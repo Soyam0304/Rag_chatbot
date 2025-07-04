@@ -25,8 +25,8 @@ flowchart TD
     D --> E[FAISS Vector Store]
     E --> F[Retrieve Relevant Chunks]
     F --> G[Cohere Rerank]
-    G --> H[Llama (Groq) Generates Answer]
-    H --> I[Answer & Sources Shown in Streamlit]
+    G --> H[Llama Groq Generates Answer]
+    H --> I[Answer and Sources Shown in Streamlit]
 ```
 
 ## Setup
@@ -74,4 +74,4 @@ Note: Processing large Wikipedia articles or files may take some time due to emb
 
 ## License
 
-MIT 
+MIT
