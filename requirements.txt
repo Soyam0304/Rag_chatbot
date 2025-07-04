@@ -8,4 +8,5 @@ unstructured[all-docs]
 wikipedia
 PyPDF2
 python-dotenv
-requests 
+requests
+langchain-community 
