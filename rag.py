@@ -7,6 +7,25 @@ from rag_utils import process_documents, answer_question
 load_dotenv()
 
 st.set_page_config(page_title="RAG App with Llama & LangChain", layout="wide")
+
+# Sidebar image and info
+with st.sidebar:
+    st.image(
+        "https://i.pinimg.com/736x/e0/aa/ce/e0aace4e8ac951195fbbd1a97b0c1d87.jpg",
+        width=180,
+        caption="AI Document Q&A Assistant"
+    )
+    st.markdown(
+        """
+        **About this Chatbot**
+        
+        - 🤖 Ask questions about your uploaded documents, URLs, or Wikipedia topics.
+        - 📄 Supports PDF, TXT, web, and Wikipedia sources.
+        - 🧠 Uses advanced AI (RAG, Llama, Cohere, HuggingFace) for accurate answers.
+        - 💬 Chat history is maintained for each document session.
+        """
+    )
+
 st.title("🔍 RAG App: Llama + LangChain + HuggingFace + Cohere Rerank")
 
 st.markdown("""
@@ -31,6 +50,29 @@ with col1:
 with col2:
     wiki_topic = st.text_input("Or enter a Wikipedia topic:")
 
+# Detect if new documents are uploaded or source changed
+new_docs_uploaded = False
+if (
+    uploaded_files and (
+        "last_uploaded_filenames" not in st.session_state or
+        [f.name for f in uploaded_files] != st.session_state.get("last_uploaded_filenames", [])
+    )
+) or (
+    url and url != st.session_state.get("last_url", "")
+) or (
+    wiki_topic and wiki_topic != st.session_state.get("last_wiki_topic", "")
+):
+    new_docs_uploaded = True
+
+# Reset memory if new docs/source
+if new_docs_uploaded:
+    st.session_state["chat_history"] = []
+    st.session_state.pop("vectorstore", None)
+    st.session_state.pop("docs", None)
+    st.session_state["last_uploaded_filenames"] = [f.name for f in uploaded_files] if uploaded_files else []
+    st.session_state["last_url"] = url
+    st.session_state["last_wiki_topic"] = wiki_topic
+
 # Process documents
 if st.button("Process Documents"):
     if not uploaded_files and not url and not wiki_topic:
@@ -42,18 +84,27 @@ if st.button("Process Documents"):
     st.session_state["vectorstore"] = vectorstore
     st.success("Documents processed and vector store ready!")
 
-# Question input
+# Initialize chat history
+if "chat_history" not in st.session_state:
+    st.session_state["chat_history"] = []
+
+# Chat interface
 if "vectorstore" in st.session_state:
-    question = st.text_input("Ask a question about your documents:")
-    if st.button("Get Answer") and question:
+    user_input = st.chat_input("Ask a question about your documents...")
+    if user_input:
+        st.session_state["chat_history"].append(("User", user_input))
         with st.spinner("Retrieving answer..."):
             answer, sources = answer_question(
-                question,
+                user_input,
                 st.session_state["vectorstore"],
                 st.session_state["docs"]
             )
-        st.markdown(f"**Answer:** {answer}")
+        response = f"**Answer:** {answer}"
         if sources:
-            st.markdown("**Sources:**")
-            for src in sources:
-                st.markdown(f"- {src}") 
+            response += "\n\n**Sources:**\n" + "\n".join(f"- {src}" for src in sources)
+        st.session_state["chat_history"].append(("Agent", response))
+
+    # Show chat
+    for sender, message in st.session_state["chat_history"]:
+        with st.chat_message(sender):
+            st.markdown(message, unsafe_allow_html=True) 
