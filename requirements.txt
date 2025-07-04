@@ -1,0 +1,11 @@
+streamlit
+langchain
+langchain_groq
+sentence-transformers
+faiss-cpu
+cohere
+unstructured[all-docs]
+wikipedia
+PyPDF2
+python-dotenv
+requests 
