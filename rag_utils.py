@@ -9,9 +9,15 @@ from langchain_groq import ChatGroq
 import cohere
 from langchain.schema import HumanMessage
 
-load_dotenv()
+load_dotenv() 
 
-# API keys from .env
+
+os.environ["LANGCHAIN_TRACING_V2"] = "true"
+os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
+os.environ["LANGCHAIN_PROJECT"] = os.getenv("LANGSMITH_PROJECT", "rag-app")
+
+
+
 groq_api_key = os.getenv("GROQ_API_KEY")
 cohere_api_key = os.getenv("COHERE_API_KEY")
 
@@ -23,7 +29,6 @@ co = cohere.Client(cohere_api_key)
 
 def process_documents(uploaded_files, url, wiki_topic):
     docs = []
-    # Load PDF and TXT files
     for file in uploaded_files or []:
         if file.name.endswith(".pdf"):
             suffix = ".pdf"
