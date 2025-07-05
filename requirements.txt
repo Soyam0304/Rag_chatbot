@@ -9,4 +9,5 @@ wikipedia
 PyPDF2
 python-dotenv
 requests
-langchain-community 
+langchain-community
+langgraph
